@@ -1,11 +1,11 @@
 === XML Feed for Skroutz & BestPrice for WooCommerce ===
 Contributors: dichagr, theogk
 Tags: skroutz, bestprice, xml, feed, marketplace
-Stable tag: 1.0.1
+Stable tag: 1.0.3
 Requires at least: 5.6
-Tested up to: 6.7.1
+Tested up to: 6.7.2
 WC requires at least: 6.2.0
-WC tested up to: 9.5.1
+WC tested up to: 9.6.1
 Requires PHP: 7.4
 License: GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
@@ -104,9 +104,18 @@ It is optimized to run on servers with low resources and the minimum PHP memory 
 
 == Changelog ==
 
+= 1.0.3 =
+*Release Date - 07 Feb 2025*
+* Feature: Add support for native WooCommerce Brands (added recently in WooCommerce core v9.6.0).
+* Feature: Add missing support for native Woo EAN/Barcode field.
+* Improvement: Easier XML generation via cron. More details on the Doc for developers.
+* Improvement: Better instructions for the checkbox that enables the extra EAN/Barcode field.
+* Fix: Fix availability column width in admin product list, caused by a deprecated class name.
+* Compatibility: Checked with the latest WordPress and WooCommerce versions.
+
 = 1.0.1 =
 *Release Date - 26 Dec 2024*
-* Support for XML generation via WP-CLI.
+* Feature: Support for XML generation via WP-CLI.
 
 = 1.0.0 =
 *Release Date - 20 Dec 2024*

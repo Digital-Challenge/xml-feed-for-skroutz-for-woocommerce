@@ -5,29 +5,39 @@
  *
  * Defines the plugin name, version, and two examples hooks for how to
  * enqueue the admin-specific stylesheet and JavaScript.
+ *
+ * @noinspection PhpUnused
+ * @noinspection HtmlUnknownTarget
  */
 class Dicha_Skroutz_Feed_Admin {
 
 	/**
 	 * The ID of this plugin.
 	 *
-	 * @var string $plugin_name The ID of this plugin.
+	 * @var string $plugin_name
 	 */
-	private $plugin_name;
+	private string $plugin_name;
 
 	/**
-	 * The version of this plugin.
+	 * The current version of this plugin.
 	 *
-	 * @var string $version The current version of this plugin.
+	 * @var string $version
 	 */
-	private $version;
+	private string $version;
 
 	/**
 	 * A list of attribute slug/labels, ready for display in inputs.
 	 *
 	 * @var array $attributes_list
 	 */
-	private $attributes_list;
+	private array $attributes_list;
+
+	/**
+	 * The installed version of WooCommerce plugin.
+	 *
+	 * @var string $woo_version
+	 */
+	private string $woo_version;
 
 
 	/**
@@ -36,10 +46,11 @@ class Dicha_Skroutz_Feed_Admin {
 	 * @param string $plugin_name The name of this plugin.
 	 * @param string $version     The version of this plugin.
 	 */
-	public function __construct( $plugin_name, $version ) {
+	public function __construct( string $plugin_name, string $version ) {
 
 		$this->plugin_name = $plugin_name;
 		$this->version     = $version;
+		$this->woo_version = defined( 'WC_VERSION' ) ? WC_VERSION : '6.2.0';
 	}
 
 
@@ -52,7 +63,7 @@ class Dicha_Skroutz_Feed_Admin {
 	/**
 	 * Register top-level menu page if not created already by other DC plugin.
 	 */
-	public function create_dc_toplevel_menu() {
+	public function create_dc_toplevel_menu(): void {
 
 		if ( empty ( $GLOBALS['admin_page_hooks']['digital_challenge_plugins'] ) ) {
 			add_menu_page(
@@ -72,10 +83,11 @@ class Dicha_Skroutz_Feed_Admin {
 		] );
 	}
 
+
 	/**
 	 * Creates main page and tab menu <ul>. Also provides a hook for other plugins to hook their own tab <li>.
 	 */
-	public function digital_challenge_plugin_settings() {
+	public function digital_challenge_plugin_settings(): void {
 
 		if ( ! current_user_can( 'manage_options' ) ) return;
 
@@ -103,10 +115,11 @@ class Dicha_Skroutz_Feed_Admin {
 		<?php
 	}
 
+
 	/**
 	 * Creates the tab menu item which contains the plugin's settings.
 	 */
-	public function create_plugin_settings_tab() {
+	public function create_plugin_settings_tab(): void {
 		?>
 		<li class="dc-plugin-tab">
 			<?php if ( isset( $_GET['page'] ) && $_GET['page'] === DICHA_SKROUTZ_FEED_SLUG ) : ?>
@@ -118,20 +131,22 @@ class Dicha_Skroutz_Feed_Admin {
 		<?php
 	}
 
+
 	/**
 	 * Displays an external link to see all Digital Challenge plugins, if no plugin tab is selected.
 	 */
-	function dc_render_settings_homepage() {
+	function dc_render_settings_homepage(): void {
 		?>
 		<a href="https://www.dicha.gr/plugins/" target="_blank" title="Digital Challenge Plugins"><?php esc_html_e( 'Δείτε όλα τα plugins της Digital Challenge', 'xml-feed-for-skroutz-for-woocommerce' ); ?></a>
 		<?php
 	}
 
+
 	/**
 	 * Creates settings sections and fields.
 	 * Registers settings.
 	 */
-	function register_plugin_settings() {
+	function register_plugin_settings(): void {
 
 		add_settings_section(
 			'dicha_skroutz_feed_cron_section',
@@ -311,7 +326,7 @@ class Dicha_Skroutz_Feed_Admin {
 	/**
 	 * Prints the Settings form and XML Feed Tools.
 	 */
-	function render_plugin_settings() {
+	function render_plugin_settings(): void {
 
 		// todo maybe create an options migrator
 
@@ -321,7 +336,7 @@ class Dicha_Skroutz_Feed_Admin {
 			<form action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" method="post" class="dicha-skroutz-feed-tools-wrapper">
 				<h2><?php esc_html_e( 'XML Feed Tools', 'xml-feed-for-skroutz-for-woocommerce' ); ?></h2>
 				<p><?php esc_html_e( 'Last XML feed generated at:', 'xml-feed-for-skroutz-for-woocommerce' ); ?>
-					<strong><?php echo esc_html( $last_run ? $last_run : __( 'Never', 'xml-feed-for-skroutz-for-woocommerce' ) ); ?></strong>
+					<strong><?php echo esc_html( $last_run ?: __( 'Never', 'xml-feed-for-skroutz-for-woocommerce' ) ); ?></strong>
 				</p>
 				<p><?php esc_html_e( 'Submit the following URL to Skroutz or BestPrice:', 'xml-feed-for-skroutz-for-woocommerce' ); ?>
 					<br>
@@ -352,10 +367,11 @@ class Dicha_Skroutz_Feed_Admin {
 		<?php
 	}
 
+
 	/**
 	 * Saves the plugin's Settings.
 	 */
-	function save_settings() {
+	function save_settings(): void {
 
 		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ?? '' ) ), 'dicha_skroutz_feed_option_group-options' ) ) return;
 		if ( ! current_user_can( 'manage_options' ) ) return;
@@ -398,13 +414,15 @@ class Dicha_Skroutz_Feed_Admin {
 		exit;
 	}
 
+
 	/**
 	 * Updates the scheduled cron actions for XML feed generation.
 	 *
 	 * @param array $new_cron_options
+	 *
 	 * @return void
 	 */
-	function maybe_set_cron( $new_cron_options ) {
+	function maybe_set_cron( array $new_cron_options ): void {
 
 		$hook  = 'dicha_skroutz_feed_generation';
 		$args  = [];
@@ -420,12 +438,13 @@ class Dicha_Skroutz_Feed_Admin {
 		}
 	}
 
+
 	/**
 	 * Prints a notice in the settings page about the outcome of the manual XML generation process.
 	 *
 	 * @return void
 	 */
-	function print_notices() {
+	function print_notices(): void {
 
 		if ( isset( $_GET['updated'] ) && '1' === $_GET['updated'] ) : ?>
 			<div class="updated">
@@ -460,23 +479,25 @@ class Dicha_Skroutz_Feed_Admin {
 	/**
 	 * Prints the Feed generation schedule section description.
 	 */
-	function print_cron_settings_info() {
+	function print_cron_settings_info(): void {
 		esc_html_e( 'Settings about the scheduling of Skroutz/BestPrice XML feed generation.', 'xml-feed-for-skroutz-for-woocommerce' );
 	}
+
 
 	/**
 	 * Prints the XML Settings section description.
 	 */
-	function print_skroutz_settings_info() {
+	function print_skroutz_settings_info(): void {
 		esc_html_e( 'Settings to control the product data for the XML feed.', 'xml-feed-for-skroutz-for-woocommerce' );
 		echo '<br>';
 		esc_html_e( 'Do NOT use the same attribute in multiple fields, for example in both Color and Size.', 'xml-feed-for-skroutz-for-woocommerce' );
 	}
 
+
 	/**
 	 * Prints the logs settings section description.
 	 */
-	function print_logs_settings_info() {
+	function print_logs_settings_info(): void {
 		esc_html_e( 'Settings about logging during the feed generation.', 'xml-feed-for-skroutz-for-woocommerce' );
 	}
 
@@ -484,7 +505,7 @@ class Dicha_Skroutz_Feed_Admin {
 	/**
 	 * Prints the HTML for the cron schedule field in the settings.
 	 */
-	function dicha_skroutz_feed_cron_callback() {
+	function dicha_skroutz_feed_cron_callback(): void {
 
 		$current_cron_options = get_option( 'dicha_skroutz_feed_cron', [ 'h' => '', 'm' => '50' ] );
 
@@ -574,7 +595,7 @@ class Dicha_Skroutz_Feed_Admin {
 	 *
 	 * @return string
 	 */
-	private function get_html_for_cron_hour_field( $current_cron_options ) {
+	private function get_html_for_cron_hour_field( array $current_cron_options ): string {
 
 		$current_cron_hour = ! empty( $current_cron_options['h'] ) ? (int) $current_cron_options['h'] : '';
 		$cron_hour_options = [ 1, 2, 3, 4, 6, 8, 12, 24 ];
@@ -597,6 +618,7 @@ class Dicha_Skroutz_Feed_Admin {
 		return ob_get_clean();
 	}
 
+
 	/**
 	 * Prints the HTML for the cron schedule minute field in the settings.
 	 *
@@ -604,7 +626,7 @@ class Dicha_Skroutz_Feed_Admin {
 	 *
 	 * @return string
 	 */
-	private function get_html_for_cron_minute_field( $current_cron_options ) {
+	private function get_html_for_cron_minute_field( array $current_cron_options ): string {
 
 		$current_cron_minute = ! empty( $current_cron_options['m'] ) ? (int) $current_cron_options['m'] : 0;
 
@@ -618,29 +640,36 @@ class Dicha_Skroutz_Feed_Admin {
 		return ob_get_clean();
 	}
 
+
 	/**
 	 * Prints the HTML for the manufacturer field in the settings.
 	 */
-	function dicha_skroutz_feed_manufacturer_callback() {
+	function dicha_skroutz_feed_manufacturer_callback(): void {
 
-		$options         = $this->prepare_attributes_list();
-		$selected_values = get_option( 'dicha_skroutz_feed_manufacturer', [] );
+		$selected_values      = get_option( 'dicha_skroutz_feed_manufacturer', [] );
+		$options              = $this->prepare_attributes_list();
+		$custom_brand_options = [];
+
+		if ( ! empty( $options['custom_taxonomies'] ) ) {
+			if ( isset( $options['custom_taxonomies']['product_brand'] ) ) {
+				$custom_brand_options['woo__product_brand'] = __( 'WooCommerce Brands', 'xml-feed-for-skroutz-for-woocommerce' );
+			}
+			// maybe add support for other brands plugins here...
+		}
+
 		?>
+		<!--suppress HtmlFormInputWithoutLabel -->
 		<select id="dicha_skroutz_feed_manufacturer" name="dicha_skroutz_feed_manufacturer[]" class="select-woo-input" multiple="multiple">
-			<optgroup label="<?php esc_html_e( 'Select attributes:', 'xml-feed-for-skroutz-for-woocommerce' ); ?>">
+			<optgroup label="<?php esc_html_e( 'Available product attributes:', 'xml-feed-for-skroutz-for-woocommerce' ); ?>">
 				<?php foreach ( $options['attribute_taxonomies'] as $attr_slug => $attr_name ) : ?>
 					<option value="<?php echo esc_attr( $attr_slug ); ?>"<?php selected( in_array( $attr_slug, $selected_values ) ); ?>>
 						<?php echo esc_html( $attr_name ); ?>
 					</option>
 				<?php endforeach; ?>
 			</optgroup>
-			<?php
-				// disabled custom taxonomies support for now (with false inside if)
-				// to do maybe: custom brand taxonomies: find how to get term from custom tax and modify skroutz_get_manufacturer() - or not
-			?>
-			<?php if ( false && !empty( $options['custom_taxonomies'] ) ) : ?>
-				<optgroup label="<?php esc_html_e( 'Select custom taxonomies:', 'xml-feed-for-skroutz-for-woocommerce' ); ?>">
-					<?php foreach ( $options['custom_taxonomies'] as $tax_slug => $tax_name ) : ?>
+			<?php if ( ! empty( $custom_brand_options ) ) : ?>
+				<optgroup label="<?php esc_html_e( 'Other brand taxonomies:', 'xml-feed-for-skroutz-for-woocommerce' ); ?>">
+					<?php foreach ( $custom_brand_options as $tax_slug => $tax_name ) : ?>
 						<option value="<?php echo esc_attr( $tax_slug ); ?>"<?php selected( in_array( $tax_slug, $selected_values ) ); ?>>
 							<?php echo esc_html( $tax_name ); ?>
 						</option>
@@ -651,16 +680,18 @@ class Dicha_Skroutz_Feed_Admin {
 		<?php
 	}
 
+
 	/**
 	 * Prints the HTML for the color field in the settings.
 	 */
-	function dicha_skroutz_feed_color_callback() {
+	function dicha_skroutz_feed_color_callback(): void {
 
 		$options         = $this->prepare_attributes_list();
 		$selected_values = get_option( 'dicha_skroutz_feed_color', [] );
 		?>
+		<!--suppress HtmlFormInputWithoutLabel -->
 		<select id="dicha_skroutz_feed_color" name="dicha_skroutz_feed_color[]" class="select-woo-input" multiple="multiple">
-			<optgroup label="<?php esc_html_e( 'Select attributes:', 'xml-feed-for-skroutz-for-woocommerce' ); ?>">
+			<optgroup label="<?php esc_html_e( 'Available product attributes:', 'xml-feed-for-skroutz-for-woocommerce' ); ?>">
 				<?php foreach ( $options['attribute_taxonomies'] as $attr_slug => $attr_name ) : ?>
 					<option value="<?php echo esc_attr( $attr_slug ); ?>"<?php selected( in_array( $attr_slug, $selected_values ) ); ?>>
 						<?php echo esc_html( $attr_name ); ?>
@@ -670,17 +701,19 @@ class Dicha_Skroutz_Feed_Admin {
 		</select>
 		<?php
 	}
+
 
 	/**
 	 * Prints the HTML for the size field in the settings.
 	 */
-	function dicha_skroutz_feed_size_callback() {
+	function dicha_skroutz_feed_size_callback(): void {
 
 		$options         = $this->prepare_attributes_list();
 		$selected_values = get_option( 'dicha_skroutz_feed_size', [] );
 		?>
+		<!--suppress HtmlFormInputWithoutLabel -->
 		<select id="dicha_skroutz_feed_size" name="dicha_skroutz_feed_size[]" class="select-woo-input" multiple="multiple">
-			<optgroup label="<?php esc_html_e( 'Select attributes:', 'xml-feed-for-skroutz-for-woocommerce' ); ?>">
+			<optgroup label="<?php esc_html_e( 'Available product attributes:', 'xml-feed-for-skroutz-for-woocommerce' ); ?>">
 				<?php foreach ( $options['attribute_taxonomies'] as $attr_slug => $attr_name ) : ?>
 					<option value="<?php echo esc_attr( $attr_slug ); ?>"<?php selected( in_array( $attr_slug, $selected_values ) ); ?>>
 						<?php echo esc_html( $attr_name ); ?>
@@ -691,14 +724,16 @@ class Dicha_Skroutz_Feed_Admin {
 		<?php
 	}
 
+
 	/**
 	 * Prints the HTML for the availability field in the settings.
 	 */
-	function dicha_skroutz_feed_availability_callback() {
+	function dicha_skroutz_feed_availability_callback(): void {
 
 		$selected_availability  = get_option( 'dicha_skroutz_feed_availability' );
 		$skroutz_availabilities = self::skroutz_get_availability_options( false, true );
 		?>
+		<!--suppress HtmlFormInputWithoutLabel -->
 		<select id="dicha_skroutz_feed_availability" name="dicha_skroutz_feed_availability">
 			<?php foreach ( $skroutz_availabilities as $key => $availability_label ) : ?>
 				<option value="<?php echo esc_attr( $key ); ?>"<?php selected( $selected_availability, $key ); ?>>
@@ -712,10 +747,11 @@ class Dicha_Skroutz_Feed_Admin {
 		<?php
 	}
 
+
 	/**
 	 * Prints the HTML for the backorders inclusion field in the settings.
 	 */
-	function dicha_skroutz_feed_include_backorders_callback() {
+	function dicha_skroutz_feed_include_backorders_callback(): void {
 
 		$dicha_skroutz_feed_include_backorders = get_option( 'dicha_skroutz_feed_include_backorders', 'no' );
 		?>
@@ -726,17 +762,28 @@ class Dicha_Skroutz_Feed_Admin {
 		<?php
 	}
 
+
 	/**
 	 * Prints the HTML for the attributes in product name field in the settings.
 	 */
-	function dicha_skroutz_feed_title_attributes_callback() {
+	function dicha_skroutz_feed_title_attributes_callback(): void {
 
-		$options         = $this->prepare_attributes_list();
-		$selected_values = get_option( 'dicha_skroutz_feed_title_attributes', [] );
+		$selected_values         = get_option( 'dicha_skroutz_feed_title_attributes', [] );
+		$options                 = $this->prepare_attributes_list();
+		$custom_taxonomy_options = [];
+
+		if ( ! empty( $options['custom_taxonomies'] ) ) {
+			if ( isset( $options['custom_taxonomies']['product_brand'] ) ) {
+				$custom_taxonomy_options['woo__product_brand'] = __( 'WooCommerce Brands', 'xml-feed-for-skroutz-for-woocommerce' );
+			}
+			// maybe add support for other custom taxonomies here...
+		}
+
 		?>
+		<!--suppress HtmlFormInputWithoutLabel -->
 		<select id="dicha_skroutz_feed_title_attributes" name="dicha_skroutz_feed_title_attributes[]"
 		        class="select-woo-input" multiple="multiple">
-			<optgroup label="<?php esc_html_e( 'Select attributes:', 'xml-feed-for-skroutz-for-woocommerce' ); ?>">
+			<optgroup label="<?php esc_html_e( 'Available product attributes:', 'xml-feed-for-skroutz-for-woocommerce' ); ?>">
 				<?php foreach ( $options['attribute_taxonomies'] as $attr_slug => $attr_name ) : ?>
 					<option
 						value="<?php echo esc_attr( $attr_slug ); ?>"<?php selected( in_array( $attr_slug, $selected_values ) ); ?>>
@@ -744,6 +791,15 @@ class Dicha_Skroutz_Feed_Admin {
 					</option>
 				<?php endforeach; ?>
 			</optgroup>
+			<?php if ( ! empty( $custom_taxonomy_options ) ) : ?>
+				<optgroup label="<?php esc_html_e( 'Other taxonomies:', 'xml-feed-for-skroutz-for-woocommerce' ); ?>">
+					<?php foreach ( $custom_taxonomy_options as $tax_slug => $tax_name ) : ?>
+						<option value="<?php echo esc_attr( $tax_slug ); ?>"<?php selected( in_array( $tax_slug, $selected_values ) ); ?>>
+							<?php echo esc_html( $tax_name ); ?>
+						</option>
+					<?php endforeach; ?>
+				</optgroup>
+			<?php endif; ?>
 		</select>
 		<p class="desc">
 			<?php echo wp_kses_post( __( 'These attributes will be added to XML product name (if not included already).', 'xml-feed-for-skroutz-for-woocommerce' ) ); ?>
@@ -751,10 +807,11 @@ class Dicha_Skroutz_Feed_Admin {
 		<?php
 	}
 
+
 	/**
 	 * Prints the HTML for the description field in the settings.
 	 */
-	function dicha_skroutz_feed_description_callback() {
+	function dicha_skroutz_feed_description_callback(): void {
 
 		$dicha_skroutz_feed_description = get_option( 'dicha_skroutz_feed_description', 'short' );
 		?>
@@ -773,24 +830,30 @@ class Dicha_Skroutz_Feed_Admin {
 		<?php
 	}
 
+
 	/**
 	 * Prints the HTML for the ean field in the settings.
 	 */
-	function dicha_skroutz_feed_enable_ean_field_callback() {
+	function dicha_skroutz_feed_enable_ean_field_callback(): void {
 
-		$dicha_skroutz_feed_enable_ean_field = get_option( 'dicha_skroutz_feed_enable_ean_field', 'yes' );
+		$default_ean_enabled = version_compare( $this->woo_version, '9.2', '>=' ) ? 'no' : 'yes';
+		$dicha_skroutz_feed_enable_ean_field = get_option( 'dicha_skroutz_feed_enable_ean_field', $default_ean_enabled );
 		?>
 		<label for="dicha_skroutz_feed_enable_ean_field">
 			<input type="checkbox" id="dicha_skroutz_feed_enable_ean_field" name="dicha_skroutz_feed_enable_ean_field" value="yes"<?php checked( 'yes', $dicha_skroutz_feed_enable_ean_field ); ?>>
 			<?php esc_html_e( 'Add new field for inserting the EAN/Barcode info. The field will appear under WooCommerce SKU field.', 'xml-feed-for-skroutz-for-woocommerce' ); ?>
+			<?php if ( ! wc_string_to_bool( $dicha_skroutz_feed_enable_ean_field ) && version_compare( $this->woo_version, '9.2', '>=' ) ) : ?>
+				<br><?php esc_html_e( 'We suggest keeping this unchecked. Use the new native WooCommerce field called "GTIN, UPC, EAN, or ISBN" which is located under the "SKU" field.', 'xml-feed-for-skroutz-for-woocommerce' ); ?>
+			<?php endif; ?>
 		</label>
 		<?php
 	}
 
+
 	/**
 	 * Prints the HTML for the categories filter field in the settings.
 	 */
-	function dicha_skroutz_feed_filter_categories_callback() {
+	function dicha_skroutz_feed_filter_categories_callback(): void {
 
 		$terms                = $this->get_taxonomy_list_tree( 'product_cat' );
 		$include_exclude_mode = get_option( 'dicha_skroutz_incl_excl_mode_categories' );
@@ -807,6 +870,7 @@ class Dicha_Skroutz_Feed_Admin {
 				<?php esc_html_e( 'Include', 'xml-feed-for-skroutz-for-woocommerce' ); ?>
 			</option>
 		</select>
+		<!--suppress HtmlFormInputWithoutLabel -->
 		<select id="dicha_skroutz_feed_filter_categories"
 		        name="dicha_skroutz_feed_filter_categories[]" class="select-woo-input" multiple="multiple">
 			<?php foreach ( $terms as $term_id => $term_name ) : ?>
@@ -818,10 +882,11 @@ class Dicha_Skroutz_Feed_Admin {
 		<?php
 	}
 
+
 	/**
 	 * Prints the HTML for the tags filter field in the settings.
 	 */
-	function dicha_skroutz_feed_filter_tags_callback() {
+	function dicha_skroutz_feed_filter_tags_callback(): void {
 
 		$terms                = $this->get_taxonomy_list_tree( 'product_tag' );
 		$include_exclude_mode = get_option( 'dicha_skroutz_incl_excl_mode_tags' );
@@ -838,6 +903,7 @@ class Dicha_Skroutz_Feed_Admin {
 				<?php esc_html_e( 'Include', 'xml-feed-for-skroutz-for-woocommerce' ); ?>
 			</option>
 		</select>
+		<!--suppress HtmlFormInputWithoutLabel -->
 		<select id="dicha_skroutz_feed_filter_tags"
 		        name="dicha_skroutz_feed_filter_tags[]" class="select-woo-input" multiple="multiple">
 			<?php foreach ( $terms as $term_id => $term_name ) : ?>
@@ -849,30 +915,35 @@ class Dicha_Skroutz_Feed_Admin {
 		<?php
 	}
 
+
 	/**
 	 * Prints the HTML for the shipping cost field in the settings.
 	 */
-	function dicha_skroutz_feed_shipping_cost_callback() {
+	function dicha_skroutz_feed_shipping_cost_callback(): void {
 		printf(
 			'<input type="text" id="dicha_skroutz_feed_shipping_cost" name="dicha_skroutz_feed_shipping_cost" value="%s" />',
 			esc_attr( get_option( 'dicha_skroutz_feed_shipping_cost' ) )
 		);
 	}
 
+
 	/**
 	 * Prints the HTML for the free shipping field in the settings.
 	 */
-	function dicha_skroutz_feed_free_shipping_callback() {
+	function dicha_skroutz_feed_free_shipping_callback(): void {
 		printf(
 			'<input type="text" id="dicha_skroutz_feed_free_shipping" name="dicha_skroutz_feed_free_shipping" value="%s" />',
 			esc_attr( get_option( 'dicha_skroutz_feed_free_shipping' ) )
 		);
 	}
 
+
 	/**
 	 * Prints the HTML for the logs level field in the settings.
+	 *
+	 * @noinspection HtmlUnknownTarget
 	 */
-	function dicha_skroutz_feed_log_level_callback() {
+	function dicha_skroutz_feed_log_level_callback(): void {
 
 		$current_val = get_option( 'dicha_skroutz_feed_log_level', 'minimal' );
 		$options     = [
@@ -882,6 +953,7 @@ class Dicha_Skroutz_Feed_Admin {
 		];
 
 		?>
+		<!--suppress HtmlFormInputWithoutLabel -->
 		<select id="dicha_skroutz_feed_log_level" name="dicha_skroutz_feed_log_level">
 			<?php foreach ( $options as $key => $option ) : ?>
 				<option value="<?php echo esc_attr( $key ); ?>"<?php selected( $current_val === $key ); ?>>
@@ -913,9 +985,9 @@ class Dicha_Skroutz_Feed_Admin {
 	 *
 	 * @return array
 	 */
-	function prepare_attributes_list() {
+	function prepare_attributes_list(): array {
 
-		if ( !empty( $this->attributes_list ) ) return $this->attributes_list;
+		if ( ! empty( $this->attributes_list ) ) return $this->attributes_list;
 
 		$all_product_taxonomies = wp_list_pluck( get_object_taxonomies( 'product', 'objects' ), 'label', 'name' );
 		$attribute_taxonomies   = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_label', 'attribute_name' );
@@ -930,9 +1002,9 @@ class Dicha_Skroutz_Feed_Admin {
 		$attribute_taxonomies_prefixed = array_map( function( $v ) { return 'pa_' . $v; }, array_keys( $attribute_taxonomies ) );
 		$custom_taxonomies             = array_filter( $all_product_taxonomies, function( $tax_slug ) use ( $attribute_taxonomies_prefixed, $woo_native_taxonomies ) {
 			return ! in_array( $tax_slug, array_merge( $attribute_taxonomies_prefixed, $woo_native_taxonomies ) );
-		}, ARRAY_FILTER_USE_KEY  );
+		}, ARRAY_FILTER_USE_KEY );
 
-		$this->attributes_list =  [
+		$this->attributes_list = [
 			'attribute_taxonomies' => $attribute_taxonomies,
 			'custom_taxonomies'    => $custom_taxonomies
 		];
@@ -948,7 +1020,7 @@ class Dicha_Skroutz_Feed_Admin {
 	 *
 	 * @return array
 	 */
-	function get_taxonomy_list_tree( $taxonomy ) {
+	function get_taxonomy_list_tree( string $taxonomy ): array {
 
 		$taxonomy_terms_list = [];
 
@@ -968,13 +1040,13 @@ class Dicha_Skroutz_Feed_Admin {
 	/**
 	 * Adds recursively taxonomy terms to the hierarchical list.
 	 *
-	 * @param array  $taxonomy_terms_list
-	 * @param array  $parent_terms
-	 * @param string $taxonomy
-	 * @param int    $depth
-	 * @param string $separator
+	 * @param array          $taxonomy_terms_list
+	 * @param array|WP_Error $parent_terms
+	 * @param string         $taxonomy
+	 * @param int            $depth
+	 * @param string         $separator
 	 */
-	function build_taxonomy_tree( &$taxonomy_terms_list, $parent_terms, $taxonomy, $depth = 0, $separator = '— ' ) {
+	function build_taxonomy_tree( array &$taxonomy_terms_list, $parent_terms, string $taxonomy, int $depth = 0, string $separator = '— ' ): void {
 
 		if ( ! empty( $parent_terms ) && is_array( $parent_terms ) ) {
 
@@ -1009,7 +1081,7 @@ class Dicha_Skroutz_Feed_Admin {
 	 *
 	 * @return array
 	 */
-	public static function skroutz_get_availability_options( $include_default = false, $for_admin = false ) {
+	public static function skroutz_get_availability_options( bool $include_default = false, bool $for_admin = false ): array {
 
 		/*
 		 * Do NOT ever change keys for backward compatibility reasons.
@@ -1103,11 +1175,11 @@ class Dicha_Skroutz_Feed_Admin {
 	/**
 	 * Add a new product tab for Export Feeds settings.
 	 *
-	 * @param $product_data_tabs
+	 * @param array $product_data_tabs
 	 *
 	 * @return array
 	 */
-	public function register_new_exports_tab( $product_data_tabs ) {
+	public function register_new_exports_tab( array $product_data_tabs ): array {
 
 		$product_data_tabs['dicha_export_feeds_settings'] = [
 			'label'  => __( 'Export Feeds', 'xml-feed-for-skroutz-for-woocommerce' ),
@@ -1123,7 +1195,7 @@ class Dicha_Skroutz_Feed_Admin {
 	/**
 	 * Create Export Feeds settings tab content.
 	 */
-	public function print_exports_tab_content() {
+	public function print_exports_tab_content(): void {
 		global $post;
 		?>
 		<div id='dicha_export_feeds_settings_product_data' class='panel woocommerce_options_panel'>
@@ -1156,9 +1228,10 @@ class Dicha_Skroutz_Feed_Admin {
 	 * Adds EAN field only if enabled from global settings.
 	 *
 	 */
-	function add_ean_field_under_sku() {
+	function add_ean_field_under_sku(): void {
 
-		$dicha_skroutz_feed_enable_ean_field = get_option( 'dicha_skroutz_feed_enable_ean_field', 'yes' );
+		$default_ean_enabled = version_compare( $this->woo_version, '9.2', '>=' ) ? 'no' : 'yes';
+		$dicha_skroutz_feed_enable_ean_field = get_option( 'dicha_skroutz_feed_enable_ean_field', $default_ean_enabled );
 
 		if ( ! wc_string_to_bool( $dicha_skroutz_feed_enable_ean_field ) ) return;
 
@@ -1178,14 +1251,15 @@ class Dicha_Skroutz_Feed_Admin {
 	 *
 	 * @param int $post_id WP post id.
 	 */
-	function save_product_custom_fields( $post_id ) {
+	function save_product_custom_fields( $post_id ): void {
 
 		if ( empty( $_POST['dicha_skroutz_save_product_fields_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dicha_skroutz_save_product_fields_nonce'] ) ), 'dicha_skroutz_save_product_fields' ) ) {
 			return;
 		}
 
 		// Save EAN field only if enabled from global settings
-		$dicha_skroutz_feed_enable_ean_field = get_option( 'dicha_skroutz_feed_enable_ean_field', 'yes' );
+		$default_ean_enabled = version_compare( $this->woo_version, '9.2', '>=' ) ? 'no' : 'yes';
+		$dicha_skroutz_feed_enable_ean_field = get_option( 'dicha_skroutz_feed_enable_ean_field', $default_ean_enabled );
 
 		if ( wc_string_to_bool( $dicha_skroutz_feed_enable_ean_field ) ) {
 
@@ -1213,20 +1287,21 @@ class Dicha_Skroutz_Feed_Admin {
 	/**
 	 * Setup custom fields in product variations
 	 *
-	 * @param $loop
-	 * @param $variation_data
-	 * @param $variation
+	 * @param int     $loop           Position in the loop.
+	 * @param array   $variation_data Variation data.
+	 * @param WP_Post $variation      Post data.
 	 */
-	function print_variation_custom_fields( $loop, $variation_data, $variation ) {
+	function print_variation_custom_fields( int $loop, array $variation_data, WP_Post $variation ): void {
 
-		$dicha_skroutz_feed_enable_ean_field = get_option( 'dicha_skroutz_feed_enable_ean_field', 'yes' );
+		$default_ean_enabled = version_compare( $this->woo_version, '9.2', '>=' ) ? 'no' : 'yes';
+		$dicha_skroutz_feed_enable_ean_field = get_option( 'dicha_skroutz_feed_enable_ean_field', $default_ean_enabled );
 
 		if ( wc_string_to_bool( $dicha_skroutz_feed_enable_ean_field ) ) {
 
 			echo '<div class="form-row form-row-full">';
 			woocommerce_wp_text_input( [
-				'id'          => "variable_dicha_skroutz_feed_ean_barcode_{$loop}",
-				'name'        => "variable_dicha_skroutz_feed_ean_barcode[{$loop}]",
+				'id'          => "variable_dicha_skroutz_feed_ean_barcode_$loop",
+				'name'        => "variable_dicha_skroutz_feed_ean_barcode[$loop]",
 				'label'       => __( 'EAN/Barcode', 'xml-feed-for-skroutz-for-woocommerce' ),
 				'desc_tip'    => true,
 				'value'       => get_post_meta( $variation->ID, 'dicha_skroutz_feed_ean_barcode', true ),
@@ -1237,8 +1312,8 @@ class Dicha_Skroutz_Feed_Admin {
 
 		echo '<div class="form-row form-row-full">';
 		woocommerce_wp_select( [
-			'id'          => "variable_dicha_skroutz_feed_custom_availability_{$loop}",
-			'name'        => "variable_dicha_skroutz_feed_custom_availability[{$loop}]",
+			'id'          => "variable_dicha_skroutz_feed_custom_availability_$loop",
+			'name'        => "variable_dicha_skroutz_feed_custom_availability[$loop]",
 			'label'       => __( 'Skroutz/BestPrice Availability', 'xml-feed-for-skroutz-for-woocommerce' ),
 			'desc_tip'    => true,
 			'description' => __( 'The availability to show in XML feed for Skroutz/BestPrice. If you select the "Default availability" option, the default availability from the plugin\'s settings will be used.', 'xml-feed-for-skroutz-for-woocommerce' ),
@@ -1258,14 +1333,15 @@ class Dicha_Skroutz_Feed_Admin {
 	 * @param int $variation_id
 	 * @param int $i
 	 */
-	function save_variation_custom_fields( $variation_id, $i ) {
+	function save_variation_custom_fields( int $variation_id, int $i ): void {
 
 		if ( empty( $_POST['dicha_skroutz_save_variation_fields_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['dicha_skroutz_save_variation_fields_nonce'] ) ), 'dicha_skroutz_save_variation_fields' ) ) {
 			return;
 		}
 
 		// Save EAN field only if enabled from global settings
-		$dicha_skroutz_feed_enable_ean_field = get_option( 'dicha_skroutz_feed_enable_ean_field', 'yes' );
+		$default_ean_enabled = version_compare( $this->woo_version, '9.2', '>=' ) ? 'no' : 'yes';
+		$dicha_skroutz_feed_enable_ean_field = get_option( 'dicha_skroutz_feed_enable_ean_field', $default_ean_enabled );
 
 		if ( wc_string_to_bool( $dicha_skroutz_feed_enable_ean_field ) ) {
 
@@ -1304,7 +1380,7 @@ class Dicha_Skroutz_Feed_Admin {
 	 *
 	 * @return string[]
 	 */
-	public function register_availability_column( $columns ) {
+	public function register_availability_column( array $columns ): array {
 
 		$columns['dicha_skroutz_feed_custom_availability'] = __( 'Skroutz availability', 'xml-feed-for-skroutz-for-woocommerce' );
 
@@ -1318,19 +1394,13 @@ class Dicha_Skroutz_Feed_Admin {
 	 * @param string $column_name The name of the column to display.
 	 * @param int    $post_id     The current post ID.
 	 */
-	public function fill_availability_column( $column_name, $post_id ) {
+	public function fill_availability_column( string $column_name, int $post_id ): void {
 
 		if ( 'dicha_skroutz_feed_custom_availability' === $column_name ) {
 
-			$availability_value   = get_post_meta( $post_id,'dicha_skroutz_feed_custom_availability', true );
+			$availability_value   = get_post_meta( $post_id, 'dicha_skroutz_feed_custom_availability', true );
 			$availability_options = self::skroutz_get_availability_options( true, true );
-
-			if ( isset( $availability_options[ $availability_value ] ) ) {
-				$availability_text = $availability_options[ $availability_value ];
-			}
-			else {
-				$availability_text = array_shift( $availability_options ); // default option
-			}
+			$availability_text    = $availability_options[ $availability_value ] ?? array_shift( $availability_options );
 
 			// echo display text
 			echo esc_html( $availability_text );
@@ -1345,12 +1415,12 @@ class Dicha_Skroutz_Feed_Admin {
 	 * Add a filter for Skroutz Availability in admin products list.
 	 *
 	 */
-	public function print_custom_fields_filter_in_admin_list() {
+	public function print_custom_fields_filter_in_admin_list(): void {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		// nonce verification is handled by WordPress in post filters, so it's not needed when using the `restrict_manage_posts` hook
 		global $typenow;
 
-		//only add filter to products list
+		// only add filter to products list
 		if ( 'product' === $typenow ) {
 
 			$availability_options = self::skroutz_get_availability_options( false, true );
@@ -1381,7 +1451,7 @@ class Dicha_Skroutz_Feed_Admin {
 	 *
 	 * @param WP_Query $query The WP_Query instance (passed by reference).
 	 */
-	public function filter_by_custom_fields_query_mod( $query ) {
+	public function filter_by_custom_fields_query_mod( WP_Query $query ): void {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		// nonce verification is handled by WordPress in post filters, so it's not needed when using the `restrict_manage_posts` hook
 		global $pagenow;
@@ -1408,7 +1478,7 @@ class Dicha_Skroutz_Feed_Admin {
 	/**
 	 * Add skroutz availability select field to quick edit box, along with other WooCommerce fields.
 	 */
-	function add_availability_field_to_quick_edit_box() {
+	function add_availability_field_to_quick_edit_box(): void {
 
 		$availability_options = self::skroutz_get_availability_options( true, true );
 
@@ -1435,7 +1505,7 @@ class Dicha_Skroutz_Feed_Admin {
 	/**
 	 * Add skroutz availability select field to Bulk Edit box, along with other WooCommerce fields.
 	 */
-	function add_availability_field_to_bulk_edit_box() {
+	function add_availability_field_to_bulk_edit_box(): void {
 
 		$availability_options = self::skroutz_get_availability_options( true, true );
 		?>
@@ -1447,7 +1517,7 @@ class Dicha_Skroutz_Feed_Admin {
 					<?php foreach ( $availability_options as $avail_key => $avail_label ) :
 						printf(
 							'<option value="%1$s">%2$s</option>',
-							esc_html( $avail_key ? $avail_key : 'restore_default' ), // temp value for default option because empty value is taken already
+							esc_html( $avail_key ?: 'restore_default' ), // temp value for default option because empty value is taken already
 							esc_html( $avail_label )
 						);
 					endforeach; ?>
@@ -1463,7 +1533,7 @@ class Dicha_Skroutz_Feed_Admin {
 	 *
 	 * @param int $post_id
 	 */
-	function quick_and_bulk_edit_save_availability( $post_id ) {
+	function quick_and_bulk_edit_save_availability( int $post_id ): void {
 
 		// check user capabilities
 		if ( ! current_user_can( 'manage_woocommerce', $post_id ) ) return;
@@ -1506,7 +1576,7 @@ class Dicha_Skroutz_Feed_Admin {
 	 *
 	 * @return array The actions array.
 	 */
-	public function add_plugin_action_links( $actions, $plugin_file ) {
+	public function add_plugin_action_links( array $actions, string $plugin_file ): array {
 
 		if ( $plugin_file === DICHA_SKROUTZ_FEED_BASE_FILE ) {
 
@@ -1535,8 +1605,9 @@ class Dicha_Skroutz_Feed_Admin {
 	 * Declare compatibility with WooCommerce Features (HPOS, Cart & Checkout Blocks)
 	 *
 	 * @return void
+	 * @noinspection PhpFullyQualifiedNameUsageInspection
 	 */
-	function declare_compatibility_with_wc_features() {
+	function declare_compatibility_with_wc_features(): void {
 		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
 			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', DICHA_SKROUTZ_FEED_FILE );
 			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', DICHA_SKROUTZ_FEED_FILE );
@@ -1553,8 +1624,10 @@ class Dicha_Skroutz_Feed_Admin {
 
 	/**
 	 * Register the stylesheets for the admin area.
+	 *
+	 * @param string $hook The current admin page
 	 */
-	public function enqueue_styles( $hook ) {
+	public function enqueue_styles( string $hook ): void {
 		global $typenow;
 
 		$env_type               = wp_get_environment_type();
@@ -1580,8 +1653,10 @@ class Dicha_Skroutz_Feed_Admin {
 
 	/**
 	 * Register the JavaScript for the admin area.
+	 *
+	 * @param string $hook The current admin page
 	 */
-	public function enqueue_scripts( $hook ) {
+	public function enqueue_scripts( string $hook ): void {
 		global $typenow;
 
 		$env_type               = wp_get_environment_type();
